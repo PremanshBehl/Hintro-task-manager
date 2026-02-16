@@ -19,8 +19,9 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { io } from "socket.io-client";
-import { fetchBoard, createList, updateList, deleteList, createTask, updateTask, deleteTask } from "../../api";
+import { fetchBoard, createList, updateList, deleteList, createTask, updateTask, deleteTask, fetchActivities } from "../../api";
 import ShareModal from "../../components/board/ShareModal";
+import ActivitySidebar from "../../components/board/ActivitySidebar";
 
 // --- Components ---
 
@@ -133,6 +134,8 @@ const BoardView = () => {
     const [socket, setSocket] = useState(null);
     const [newListTitle, setNewListTitle] = useState("");
     const [showShareModal, setShowShareModal] = useState(false);
+    const [activities, setActivities] = useState([]);
+    const [showActivitySidebar, setShowActivitySidebar] = useState(false);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -151,6 +154,9 @@ const BoardView = () => {
                 setBoard(data);
                 setLists(data.lists);
                 setTasks(data.tasks);
+
+                const { data: activityData } = await fetchActivities(boardId);
+                setActivities(activityData);
             } catch (error) {
                 console.error("Failed to load board", error);
                 navigate("/");
@@ -163,6 +169,10 @@ const BoardView = () => {
         setSocket(newSocket);
 
         newSocket.emit("joinBoard", boardId);
+
+        newSocket.on("newActivity", (activity) => {
+            setActivities(prev => [activity, ...prev]);
+        });
 
         newSocket.on("taskCreated", (task) => {
             setTasks(prev => {
@@ -376,6 +386,12 @@ const BoardView = () => {
                     >
                         <span>🔗</span> Share
                     </button>
+                    <button
+                        onClick={() => setShowActivitySidebar(!showActivitySidebar)}
+                        className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-sm flex items-center gap-2"
+                    >
+                        <span>🕒</span> Activity
+                    </button>
                 </div>
                 <button onClick={() => navigate("/")} className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded">Dashboard</button>
             </div>
@@ -384,6 +400,13 @@ const BoardView = () => {
                 <ShareModal
                     shareToken={board?.shareToken}
                     onClose={() => setShowShareModal(false)}
+                />
+            )}
+
+            {showActivitySidebar && (
+                <ActivitySidebar
+                    activities={activities}
+                    onClose={() => setShowActivitySidebar(false)}
                 />
             )}
 

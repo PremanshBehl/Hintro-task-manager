@@ -29,3 +29,5 @@ export const deleteList = (id) => API.delete(`/lists/${id}`);
 export const createTask = (taskData) => API.post("/tasks", taskData);
 export const updateTask = (id, taskData) => API.put(`/tasks/${id}`, taskData);
 export const deleteTask = (id) => API.delete(`/tasks/${id}`);
+
+export const fetchActivities = (boardId) => API.get(`/boards/${boardId}/activities`);

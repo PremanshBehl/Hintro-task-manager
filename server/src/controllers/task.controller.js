@@ -1,4 +1,5 @@
 import Task from "../models/task.model.js";
+import { logActivity } from "../utils/activity.utils.js";
 
 // Create Task
 export const createTask = async (req, res) => {
@@ -21,6 +22,16 @@ export const createTask = async (req, res) => {
 
         const io = req.app.get("io");
         io.to(boardId).emit("taskCreated", task);
+
+        // Log activity
+        await logActivity({
+            io,
+            boardId,
+            userId: req.user._id,
+            action: `created task "${title}"`,
+            entityType: "task",
+            entityId: task._id,
+        });
 
         res.status(201).json(task);
     } catch (error) {
@@ -65,6 +76,16 @@ export const deleteTask = async (req, res) => {
 
         const io = req.app.get("io");
         io.to(task.boardId.toString()).emit("taskDeleted", req.params.id);
+
+        // Log activity
+        await logActivity({
+            io,
+            boardId: task.boardId,
+            userId: req.user._id,
+            action: `deleted task "${task.title}"`,
+            entityType: "task",
+            entityId: task._id,
+        });
 
         res.json({ message: "Task deleted" });
     } catch (error) {

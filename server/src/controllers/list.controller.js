@@ -1,5 +1,6 @@
 import List from "../models/list.model.js";
 import Task from "../models/task.model.js";
+import { logActivity } from "../utils/activity.utils.js";
 
 // Create a new list
 export const createList = async (req, res) => {
@@ -18,6 +19,16 @@ export const createList = async (req, res) => {
         // Emit event
         const io = req.app.get("io");
         io.to(boardId).emit("listCreated", list);
+
+        // Log activity
+        await logActivity({
+            io,
+            boardId,
+            userId: req.user._id,
+            action: `created list "${title}"`,
+            entityType: "list",
+            entityId: list._id,
+        });
 
         res.status(201).json(list);
     } catch (error) {
@@ -57,6 +68,16 @@ export const deleteList = async (req, res) => {
         // Emit event
         const io = req.app.get("io");
         io.to(list.boardId.toString()).emit("listDeleted", req.params.id);
+
+        // Log activity
+        await logActivity({
+            io,
+            boardId: list.boardId,
+            userId: req.user._id,
+            action: `deleted list "${list.title}"`,
+            entityType: "list",
+            entityId: list._id,
+        });
 
         res.json({ message: "List deleted" });
     } catch (error) {

@@ -7,6 +7,7 @@ import {
     deleteBoard,
     joinBoardByToken,
 } from "../controllers/board.controller.js";
+import { getBoardActivities } from "../controllers/activity.controller.js";
 import {
     createList,
     updateList,
@@ -29,6 +30,8 @@ router
     .get(protect, getBoard)
     .put(protect, updateBoard)
     .delete(protect, deleteBoard);
+
+router.get("/boards/:id/activities", protect, getBoardActivities);
 
 // List Routes
 router.route("/lists").post(protect, createList);
