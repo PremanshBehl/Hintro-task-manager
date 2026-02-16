@@ -38,6 +38,18 @@ const taskSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    labels: [
+      {
+        text: String,
+        color: String,
+      },
+    ],
+    checklist: [
+      {
+        text: String,
+        completed: { type: Boolean, default: false },
+      },
+    ],
   },
   { timestamps: true }
 );

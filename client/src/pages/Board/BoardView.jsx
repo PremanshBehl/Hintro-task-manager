@@ -22,10 +22,11 @@ import { io } from "socket.io-client";
 import { fetchBoard, createList, updateList, deleteList, createTask, updateTask, deleteTask, fetchActivities } from "../../api";
 import ShareModal from "../../components/board/ShareModal";
 import ActivitySidebar from "../../components/board/ActivitySidebar";
+import TaskDetailModal from "../../components/task/TaskDetailModal";
 
 // --- Components ---
 
-const TaskItem = ({ task, onDelete }) => {
+const TaskItem = ({ task, onDelete, onClick }) => {
     const {
         attributes,
         listeners,
@@ -41,19 +42,44 @@ const TaskItem = ({ task, onDelete }) => {
         opacity: isDragging ? 0.5 : 1,
     };
 
+    const completedItems = task.checklist?.filter(i => i.completed)?.length || 0;
+    const totalItems = task.checklist?.length || 0;
+
     return (
         <div
             ref={setNodeRef}
             style={style}
             {...attributes}
             {...listeners}
-            className="bg-white p-3 rounded shadow-sm mb-2 cursor-grab active:cursor-grabbing group relative"
+            onClick={() => onClick(task)}
+            className="bg-white p-3 rounded shadow-sm mb-2 cursor-pointer group relative"
         >
+            <div className="flex flex-wrap gap-1 mb-2">
+                {task.labels?.map((label, i) => (
+                    <div key={i} className={`h-1.5 w-8 rounded-full ${label.color}`} />
+                ))}
+            </div>
             <div className="font-medium">{task.title}</div>
-            {task.description && <div className="text-sm text-gray-500 mt-1">{task.description}</div>}
+            {task.description && <div className="text-sm text-gray-400 mt-1 truncate">{task.description}</div>}
+
+            {(totalItems > 0 || task.dueDate) && (
+                <div className="flex items-center gap-3 mt-2">
+                    {totalItems > 0 && (
+                        <div className={`text-[10px] flex items-center gap-1 font-bold ${completedItems === totalItems ? 'text-green-600' : 'text-gray-500'}`}>
+                            <span>✔️</span> {completedItems}/{totalItems}
+                        </div>
+                    )}
+                    {task.dueDate && (
+                        <div className={`text-[10px] flex items-center gap-1 font-bold ${new Date(task.dueDate) < new Date() ? 'text-red-500' : 'text-gray-500'}`}>
+                            <span>🕒</span> {new Date(task.dueDate).toLocaleDateString()}
+                        </div>
+                    )}
+                </div>
+            )}
+
             <button
                 onClick={(e) => { e.stopPropagation(); onDelete(task._id); }}
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500"
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 p-1"
             >
                 ×
             </button>
@@ -61,7 +87,7 @@ const TaskItem = ({ task, onDelete }) => {
     );
 };
 
-const ListItem = ({ list, tasks, onAddTask, onDeleteList, onDeleteTask }) => {
+const ListItem = ({ list, tasks, onAddTask, onDeleteList, onDeleteTask, onClickTask }) => {
     const {
         attributes,
         listeners,
@@ -104,7 +130,7 @@ const ListItem = ({ list, tasks, onAddTask, onDeleteList, onDeleteTask }) => {
             <div className="flex-1 overflow-y-auto min-h-0">
                 <SortableContext items={tasks.map(t => t._id)} strategy={verticalListSortingStrategy}>
                     {tasks.map((task) => (
-                        <TaskItem key={task._id} task={task} onDelete={onDeleteTask} />
+                        <TaskItem key={task._id} task={task} onDelete={onDeleteTask} onClick={onClickTask} />
                     ))}
                 </SortableContext>
             </div>
@@ -134,6 +160,7 @@ const BoardView = () => {
     const [socket, setSocket] = useState(null);
     const [newListTitle, setNewListTitle] = useState("");
     const [showShareModal, setShowShareModal] = useState(false);
+    const [selectedTask, setSelectedTask] = useState(null);
     const [activities, setActivities] = useState([]);
     const [showActivitySidebar, setShowActivitySidebar] = useState(false);
 
@@ -183,6 +210,7 @@ const BoardView = () => {
 
         newSocket.on("taskUpdated", (updatedTask) => {
             setTasks(prev => prev.map(t => t._id === updatedTask._id ? updatedTask : t));
+            setSelectedTask(prev => prev?._id === updatedTask._id ? updatedTask : prev);
         });
 
         newSocket.on("taskDeleted", (taskId) => {
@@ -370,6 +398,14 @@ const BoardView = () => {
         } catch (error) { console.error(error); }
     }
 
+    const handleUpdateTask = async (taskId, updates) => {
+        try {
+            await updateTask(taskId, updates);
+        } catch (error) {
+            console.error("Failed to update task", error);
+        }
+    };
+
 
     const sortedLists = useMemo(() => [...lists].sort((a, b) => a.position - b.position), [lists]); // Crude sort, rely on array order usually
     // Better: Rely on the order in the `lists` array which is managed by dnd-kit
@@ -428,6 +464,7 @@ const BoardView = () => {
                                 onAddTask={handleCreateTask}
                                 onDeleteList={handleDeleteList}
                                 onDeleteTask={handleDeleteTask}
+                                onClickTask={setSelectedTask}
                             />
                         ))}
                     </SortableContext>
@@ -445,20 +482,30 @@ const BoardView = () => {
                         </form>
                     </div>
                 </div>
+                {selectedTask && (
+                    <TaskDetailModal
+                        task={selectedTask}
+                        onUpdate={handleUpdateTask}
+                        onDelete={handleDeleteTask}
+                        onClose={() => setSelectedTask(null)}
+                    />
+                )}
 
-                <DragOverlay>
-                    {activeId ? (
-                        lists.find(l => l._id === activeId) ? (
-                            <div className="bg-gray-100 w-72 h-32 rounded-lg p-3 opacity-90 border-2 border-blue-500 transform rotate-3 cursor-grabbing shadow-xl">
-                                <span className="font-bold text-gray-700">{lists.find(l => l._id === activeId)?.title}</span>
-                            </div>
-                        ) : (
-                            <div className="bg-white p-3 rounded shadow-lg transform rotate-3 cursor-grabbing w-64 border-2 border-blue-500">
-                                {tasks.find(t => t._id === activeId)?.title}
-                            </div>
-                        )
-                    ) : null}
-                </DragOverlay>
+                {activeId && (
+                    <DragOverlay>
+                        {activeId ? (
+                            lists.find(l => l._id === activeId) ? (
+                                <div className="bg-gray-100 w-72 h-32 rounded-lg p-3 opacity-90 border-2 border-blue-500 transform rotate-3 cursor-grabbing shadow-xl">
+                                    <span className="font-bold text-gray-700">{lists.find(l => l._id === activeId)?.title}</span>
+                                </div>
+                            ) : (
+                                <div className="bg-white p-3 rounded shadow-lg transform rotate-3 cursor-grabbing w-64 border-2 border-blue-500">
+                                    {tasks.find(t => t._id === activeId)?.title}
+                                </div>
+                            )
+                        ) : null}
+                    </DragOverlay>
+                )}
             </DndContext>
         </div>
     );

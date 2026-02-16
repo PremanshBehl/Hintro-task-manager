@@ -42,18 +42,27 @@ export const createTask = async (req, res) => {
 // Update Task
 export const updateTask = async (req, res) => {
     try {
-        const { title, description, assignee, dueDate, listId, position } = req.body;
+        const { title, description, assignee, dueDate, listId, position, labels, checklist } = req.body;
+
+        const updateData = {
+            title,
+            description,
+            assignee,
+            listId,
+            position,
+            labels,
+            checklist,
+        };
+
+        if (dueDate === "") {
+            updateData.dueDate = null;
+        } else if (dueDate) {
+            updateData.dueDate = dueDate;
+        }
 
         const task = await Task.findByIdAndUpdate(
             req.params.id,
-            {
-                title,
-                description,
-                assignee,
-                dueDate,
-                listId,
-                position,
-            },
+            updateData,
             { new: true }
         );
 
