@@ -27,11 +27,11 @@ const LandingPage = () => {
             <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl border-b border-slate-200">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 premium-gradient rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-                            <Layout size={18} />
+                        <div className="w-8 h-8 premium-gradient rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200 overflow-hidden">
+                            <img src="/logo.png" alt="TaskFlow" className="w-full h-full object-cover" />
                         </div>
                         <span className="font-black text-xl tracking-tight bg-clip-text text-transparent premium-gradient">
-                            Task Flow
+                            TaskFlow
                         </span>
                     </div>
 
@@ -213,8 +213,10 @@ const LandingPage = () => {
             <footer className="py-12 border-t border-slate-100 bg-white">
                 <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
                     <div className="flex items-center gap-2">
-                        <Layout size={20} className="text-indigo-600" />
-                        <span className="font-black text-lg tracking-tight">Task Flow</span>
+                        <div className="w-6 h-6 premium-gradient rounded-md flex items-center justify-center overflow-hidden">
+                            <img src="/logo.png" alt="Branding" className="w-full h-full object-cover" />
+                        </div>
+                        <span className="font-black text-lg tracking-tight">TaskFlow</span>
                     </div>
 
                     <p className="text-slate-400 text-sm font-medium">© 2026 Task Flow. Designed for high fidelity.</p>

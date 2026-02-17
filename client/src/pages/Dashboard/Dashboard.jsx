@@ -75,8 +75,8 @@ const Dashboard = () => {
             {/* Header */}
             <header className="glass-header sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 premium-gradient rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-                        <Layout size={24} />
+                    <div className="w-10 h-10 premium-gradient rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200 overflow-hidden">
+                        <img src="/logo.png" alt="TaskFlow" className="w-full h-full object-cover" />
                     </div>
                     <h1 className="text-2xl font-black bg-clip-text text-transparent premium-gradient">
                         TaskFlow

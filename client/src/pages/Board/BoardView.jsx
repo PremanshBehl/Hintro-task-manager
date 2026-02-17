@@ -454,8 +454,8 @@ const BoardView = () => {
                         <ChevronLeft size={24} />
                     </Link>
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 premium-gradient rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-                            <Layout size={20} />
+                        <div className="w-10 h-10 premium-gradient rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200 overflow-hidden">
+                            <img src="/logo.png" alt="TaskFlow" className="w-full h-full object-cover" />
                         </div>
                         <h1 className="text-2xl font-black text-slate-800 tracking-tight">{board.title}</h1>
                     </div>
