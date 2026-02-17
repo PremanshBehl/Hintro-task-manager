@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Link as LinkIcon, LogOut, Layout, Clock } from "lucide-react";
-import { fetchBoards, createBoard } from "../../api";
+import { Plus, Link as LinkIcon, LogOut, Layout, Clock, Trash2 } from "lucide-react";
+import { fetchBoards, createBoard, deleteBoard } from "../../api";
 import { useAuth } from "../../context/AuthContext";
 
 const Dashboard = () => {
@@ -54,6 +54,20 @@ const Dashboard = () => {
 
     const handleLogout = () => {
         logout();
+    };
+
+    const handleDeleteBoard = async (e, boardId) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!confirm("Are you sure you want to delete this board? This action cannot be undone.")) return;
+
+        try {
+            await deleteBoard(boardId);
+            setBoards(boards.filter(b => b._id !== boardId));
+        } catch (error) {
+            console.error("Failed to delete board", error);
+            alert(error.response?.data?.message || "Failed to delete board");
+        }
     };
 
     return (
@@ -190,16 +204,27 @@ const Dashboard = () => {
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 group-hover:bg-indigo-100 transition-colors" />
 
                                 <div className="relative h-full flex flex-col justify-between">
-                                    <div>
-                                        <h3 className="font-bold text-xl text-slate-800 mb-2 truncate group-hover:text-indigo-600 transition-colors">
-                                            {board.title}
-                                        </h3>
-                                        <div className="flex items-center gap-2 text-slate-400">
-                                            <Clock size={14} />
-                                            <span className="text-xs font-medium uppercase tracking-wider">
-                                                Active Session
-                                            </span>
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h3 className="font-bold text-xl text-slate-800 mb-2 truncate group-hover:text-indigo-600 transition-colors pr-8">
+                                                {board.title}
+                                            </h3>
+                                            <div className="flex items-center gap-2 text-slate-400">
+                                                <Clock size={14} />
+                                                <span className="text-xs font-medium uppercase tracking-wider">
+                                                    Active Session
+                                                </span>
+                                            </div>
                                         </div>
+                                        {user && board.owner === user._id && (
+                                            <button
+                                                onClick={(e) => handleDeleteBoard(e, board._id)}
+                                                className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all relative z-10"
+                                                title="Delete Board"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        )}
                                     </div>
 
                                     <div className="flex items-center justify-between">

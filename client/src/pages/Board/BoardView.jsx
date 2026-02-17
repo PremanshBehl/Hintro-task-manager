@@ -351,6 +351,14 @@ const BoardView = () => {
         }
     };
 
+    const handleDeleteTask = async (taskId) => {
+        try {
+            await deleteTask(taskId);
+        } catch (error) {
+            console.error("Failed to delete task", error);
+        }
+    };
+
     const handleDragStart = (event) => {
         setActiveId(event.active.id);
     };
@@ -654,6 +662,7 @@ const BoardView = () => {
                 <TaskDetailModal
                     task={selectedTask}
                     onUpdate={(updates) => handleUpdateTask(selectedTask._id, updates)}
+                    onDelete={handleDeleteTask}
                     onClose={() => setSelectedTask(null)}
                 />
             )}

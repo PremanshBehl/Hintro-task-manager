@@ -107,6 +107,15 @@ export const updateBoard = async (req, res) => {
 // Delete board
 export const deleteBoard = async (req, res) => {
     try {
+        const board = await Board.findById(req.params.id);
+        if (!board) {
+            return res.status(404).json({ message: "Board not found" });
+        }
+
+        if (board.owner.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: "Not authorized to delete this board" });
+        }
+
         await Board.findByIdAndDelete(req.params.id);
         await BoardMember.deleteMany({ boardId: req.params.id });
         await List.deleteMany({ boardId: req.params.id });
