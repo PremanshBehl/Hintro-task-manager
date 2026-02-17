@@ -64,9 +64,17 @@ import appRoutes from "./routes/app.routes.js";
 app.use("/api/auth", authRoutes);
 app.use("/api", appRoutes);
 
-// Basic route
+// Basic routes
 app.get("/", (req, res) => {
     res.send("API is running...");
+});
+
+app.get("/health", (req, res) => {
+    res.status(200).json({
+        status: "ok",
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
 });
 
 // Error handling middleware
