@@ -12,7 +12,7 @@ const LoginPage = () => {
         e.preventDefault();
         try {
             await login(formData);
-            navigate("/");
+            navigate("/dashboard");
         } catch (err) {
             setError(err.response?.data?.message || "Login failed");
         }

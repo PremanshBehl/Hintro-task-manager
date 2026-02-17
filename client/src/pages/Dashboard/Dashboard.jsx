@@ -52,6 +52,10 @@ const Dashboard = () => {
         navigate(`/join/${token}`);
     };
 
+    const handleLogout = () => {
+        logout();
+    };
+
     return (
         <div className="min-h-screen bg-[#f8fafc] text-slate-900">
             {/* Header */}
@@ -71,7 +75,7 @@ const Dashboard = () => {
                         <span className="text-xs text-slate-400">Personal Workspace</span>
                     </div>
                     <button
-                        onClick={logout}
+                        onClick={handleLogout}
                         className="group flex items-center gap-2 px-4 py-2 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 transition-all duration-300"
                     >
                         <LogOut size={20} className="group-hover:rotate-12 transition-transform" />
