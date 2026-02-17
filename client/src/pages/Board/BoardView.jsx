@@ -38,7 +38,7 @@ import ShareModal from "../../components/board/ShareModal";
 import ActivitySidebar from "../../components/board/ActivitySidebar";
 import TaskDetailModal from "../../components/task/TaskDetailModal";
 
-const socket = io("http://localhost:5001");
+const socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:5001");
 
 // --- Components ---
 
